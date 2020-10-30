@@ -4,6 +4,7 @@ import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
+from sqlalchemy import and_
 
 from flask import Flask, jsonify
 
@@ -42,6 +43,7 @@ def welcome():
         f"/api/v1.0/tobs<br/>"
         f"/api/v1.0/&lt;start&gt<br/>"
         f"/api/v1.0/&lt;start&gt/&lt;end&gt<br/>"
+        f"enter dates in format like 2016-08-23"
     )
 
 @app.route("/api/v1.0/precipitation")
@@ -115,67 +117,31 @@ def tobs():
     return jsonify(tobs_date_list)
     
 @app.route("/api/v1.0/<start>")
-def startonwards(start):
-    
-    # Create our session (link) from Python to the DB
-    session = Session(engine)
+@app.route("/api/v1.0/<start>/<end>")
+def start(start=None, end=None):
+    session = Session (engine)
+    """Return temperature (min, avg and max between two parameters"""
 
-    """Return a json of the minimum average and the max temperature for a given start date"""
-    
-    # take any date and convert to yyyy-mm-dd format for the query
-    start_dt = dt.datetime.strptime(start, '%Y-%m-%d')
+    sel = [func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]
 
-    # query data for the start date value
-    results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start_dt).all()
+    if end is None:
 
-    session.close()
+        results = session.query(*sel)\
+                .filter(Measurement.date >= start).all()
+        
+        session.close()
 
-    # Create a list to hold results
-    t_list = []
-    for result in results:
-        r = {}
-        r["StartDate"] = start_dt
-        r["TMIN"] = result[0]
-        r["TAVG"] = result[1]
-        r["TMAX"] = result[2]
-        t_list.append(r)
+        tobs = list(np.ravel(results))
+        return jsonify(tobs)
 
-    # jsonify the result
-    return jsonify(t_list)
-    
-
-@app.route("/api/v1.0/temp/<start>/<end>")
-def period(start, end):
-    
-    # Create our session (link) from Python to the DB
-    session = Session(engine)
-    
-    """Return a json of the minimum average and the max temperature for a given period"""
-    
-    # take start and end dates and convert to yyyy-mm-dd format for the query
-    start_dt = dt.datetime.strptime(start, '%Y-%m-%d')
-    end_dt = dt.datetime.strptime(end, "%Y-%m-%d")
-
-    # query data for the start date value
-    results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
-                filter(Measurement.date >= start_dt).\
-                filter(Measurement.date <= end_dt)
+    results = session.query(*sel)\
+        .filter(Measurement.date >= start)\
+        .filter(Measurement.date <= end).all()
 
     session.close()
 
-    # Create a list to hold results
-    return_list = []
-    for result in results:
-        r = {}
-        r["StartDate"] = start_dt
-        r["EndDate"] = end_dt
-        r["TMIN"] = result[0]
-        r["TAVG"] = result[1]
-        r["TMAX"] = result[2]
-        return_list.append(r)
-
-    # jsonify the result
-    return jsonify(return_list)
+    result = list(np.ravel(results))
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run(debug=True)
