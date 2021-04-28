@@ -9,11 +9,17 @@ The purpose of this project was to use Python and SQLAlchemy to conduct climate 
 
 ---
 
-## Part 1 - Climate Analysis - Example Screenshots
+## Part 1 - Climate Analysis - Screenshots
 
 ![Precipitation](https://raw.githubusercontent.com/jfield24/sqlalchemy-challenge/main/Images%20of%20Outputs/precipitation.PNG)
 
 ![StationHistogram](https://raw.githubusercontent.com/jfield24/sqlalchemy-challenge/main/Images%20of%20Outputs/station-histogram.PNG)
+
+## Bonus Analysis - Screenshots
+
+![TripAvgTemp](https://raw.githubusercontent.com/jfield24/sqlalchemy-challenge/main/Images%20of%20Outputs/trip%20avg%20temp.PNG)
+
+![DailyNormals](https://raw.githubusercontent.com/jfield24/sqlalchemy-challenge/main/Images%20of%20Outputs/daily-normals.PNG)
 
 ---
 
